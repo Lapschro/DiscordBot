@@ -45,8 +45,8 @@ let mongodbSettings =  {
     useUnifiedTopology:true, 
     auth:{user:process.env.DBUSER, 
         password:process.env.DBPASS}, 
-        authSource:"admin", 
-        authMechanism:"SCRAM-SHA-1"
+        authSource:process.env.DBAUTH, 
+        authMechanism:process.env.DBAUTHMECH
     };
 MongoClient.connect(process.env.DBURL, mongodbSettings,(err, db)=>{
     if(err) throw err;
