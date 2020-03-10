@@ -145,7 +145,6 @@ function StartDiscordBot()  {
             }
         }
 
-        message.channel.startTyping();
         //creates an argument to be passed to the command
         args = {
             args:args,

@@ -16,5 +16,6 @@ Currently the variables used are:
 | DBPASS | DB user's pass | 
 | DBAUTH | MongoDB auth DB |
 | DBAUTHMECH | Type of DB auth|
+| MYID  | User ID of owner |
 
 Run `npm start` or `node index.js` to start the bot.

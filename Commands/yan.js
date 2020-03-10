@@ -5,13 +5,13 @@ const Discord = require("discord.js");
 module.exports = {
     name:'yan',
     description: 'Yande.re search!',
-    usage: 'yan [tags]',
+    usage: '<prefix>yan [<tags>]',
     aliases:["yandere"],
     cooldown: 1,
     guildonly: false,
     args: false,
     async execute(message, args) { 
-
+        message.channel.startTyping();
 
         response = await axios.get('https://yande.re/post.json', {
             params: {

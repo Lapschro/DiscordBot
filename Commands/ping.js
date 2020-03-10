@@ -4,7 +4,9 @@ module.exports = {
     cooldown: 5,
     args: false,
     guildonly: false,
+    usage:"<prefix>ping",
     execute(message, args) { 
+        message.channel.startTyping();
         message.channel.send("Pong");
         message.channel.stopTyping(true);
     },
