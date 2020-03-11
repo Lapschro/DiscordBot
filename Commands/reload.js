@@ -4,12 +4,12 @@ module.exports = {
     name:'reload',
     description: 'Reloads a command',
     cooldown: 0,
-    args: true,
+    args: false,
     guildonly: false,
     usage:"",
     hide:true,
     execute(message, args) { 
-        if(message.author.id != process.env.MYID){
+        if(message.author.id != process.env.MYID || !args['args'].length){
             message.channel.stopTyping(true);
             return;
         }

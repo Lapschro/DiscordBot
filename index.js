@@ -10,7 +10,7 @@ const client = new Discord.Client({
 );
 
 client.commands = new Discord.Collection();
-cooldowns = new Discord.Collection();
+client.cooldowns = new Discord.Collection();
 client.aliases = new Discord.Collection();
 
 //Find all commands files
@@ -26,7 +26,7 @@ for(const file of commandFiles){
         command.aliases.map(alias=>client.aliases.set(alias, command));
     }
 
-    cooldowns.set(command.name, new Discord.Collection());
+    client.cooldowns.set(command.name, new Discord.Collection());
 }
 
 const defaultPrefix = "%";
@@ -133,7 +133,7 @@ function StartDiscordBot()  {
 
         //Checks for cooldowns
         let now = Date.now();
-        const commandCooldown = cooldowns.get(command.name);
+        const commandCooldown = client.cooldowns.get(command.name);
         const cooldownAmnt = (command.cooldown || 1) * 1000;
 
         if(commandCooldown.has(message.author.id)){

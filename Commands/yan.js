@@ -1,6 +1,4 @@
 const axios = require("axios");
-const Discord = require("discord.js");
-
 
 module.exports = {
     name:'yan',
@@ -11,8 +9,6 @@ module.exports = {
     guildonly: false,
     args: false,
     async execute(message, args) { 
-        message.channel.startTyping();
-
         response = await axios.get('https://yande.re/post.json', {
             params: {
             limit: 100,
