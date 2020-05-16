@@ -10,11 +10,11 @@ module.exports = {
     hide:false,
     execute(message, args) { 
         let server_id = args['server']['server_id'];
-        if(server_id in args['musicDispatchers']){
+        if(server_id in args['musicDispatchers']){ //Check if bot is playing something atm
             args['musicDispatchers'][server_id]['list'] = [...args['musicDispatchers'][server_id]['list'],args['args'][0]];
             return;
         }else{
-            if(message.member.voice.channel){
+            if(message.member.voice.channel){ //Create a connection to the voice channel and start playing music
                 message.member.voice.channel.join().then(
                     connection =>{
                         const MakeDispatch = ()=>{

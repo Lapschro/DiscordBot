@@ -31,13 +31,13 @@ module.exports = {
             })
         } 
 
-        if(connection){
+        if(connection){ //if there's a connection, then the bot is playing something
             if(connection.dispatcher){
                 connection.dispatcher.destroy();
                 connection.dispatcher = null;
 
                 connection.list = connection.list.slice(1);
-                if(connection.list.length > 0){
+                if(connection.list.length > 0){ //If there are more songs in the list play then
                     MakeDispatch(connection.connection);
                 }else{
                     connection.connection.disconnect();

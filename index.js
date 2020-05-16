@@ -95,7 +95,7 @@ function StartDiscordBot()  {
         console.log("Online as "+client.user.tag);
     });
 
-    client.on("voiceStateUpdate", (oldUser, newUser)=>{
+    client.on("voiceStateUpdate", (oldUser, newUser)=>{ //Check if the bot is alone in channel
         let newUserChannel = newUser.channel;
         let oldUserChannel = oldUser.channel;
 

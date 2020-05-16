@@ -10,8 +10,8 @@ module.exports = {
         let server_id = args['server']['server_id'];
         if(args['musicDispatchers'][server_id]){
             console.log(args['musicDispatchers'][server_id]['list']);
-            args['musicDispatchers'][server_id]['list'].map((song)=>{
-                message.channel.send(song);
+            args['musicDispatchers'][server_id]['list'].map((song, index)=>{
+                message.channel.send(`${index} - ${song}`);
             })
         }else{
             message.channel.send("No songs on queue");
