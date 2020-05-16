@@ -12,6 +12,10 @@ const client = new Discord.Client({
 client.commands = new Discord.Collection();
 client.cooldowns = new Discord.Collection();
 client.aliases = new Discord.Collection();
+const defaultPrefix = "%";
+
+const musicDispatchers = {
+};
 
 //Find all commands files
 const commandFiles = fs.readdirSync('./Commands').filter(file => file.endsWith('.js'));
@@ -29,7 +33,6 @@ for(const file of commandFiles){
     client.cooldowns.set(command.name, new Discord.Collection());
 }
 
-const defaultPrefix = "%";
 
 let dbClient;
 let serverCollection;
@@ -45,14 +48,22 @@ let mongodbSettings =  {
     useUnifiedTopology:true, 
     auth:{user:process.env.DBUSER, 
         password:process.env.DBPASS}, 
-        authSource:process.env.DBAUTH, 
-        authMechanism:process.env.DBAUTHMECH
-    };
+    authSource:process.env.DBAUTH, 
+    authMechanism:process.env.DBAUTHMECH,
+    connectTimeoutMS:300
+};
+
 MongoClient.connect(process.env.DBURL, mongodbSettings,(err, db)=>{
-    if(err) throw err;
+    if(err) {
+        console.log("Running on no DB mode");
+        return;
+    }
 
     var dbo = db.db("Servers");
     dbClient = db;
+    if(dbClient.isConnected()){
+        console.log("Connected to BD");
+    }
     serverCollection = dbo.collection("ServerInfo");
     let collection = serverCollection.find({}).toArray((err, res)=>{
         if(err) throw err;
@@ -64,9 +75,16 @@ MongoClient.connect(process.env.DBURL, mongodbSettings,(err, db)=>{
 
 //on SIGINT close connection
 process.on("SIGINT", ()=>{
-    dbClient.close();
-    console.log("Conenction to MongoDB Closed");
-    process.exit();
+        dbClient.close();
+
+        for(var key in musicDispatchers){    
+            musicDispatchers[key].textChannel.send("Leaving due to bot turning off");
+            musicDispatchers[key].dispatcher.destroy();
+            musicDispatchers[key].connection.disconnect();
+        }
+
+        console.log("Conenction to MongoDB Closed");
+        process.exit();
     }
 );
 
@@ -77,33 +95,59 @@ function StartDiscordBot()  {
         console.log("Online as "+client.user.tag);
     });
 
-    client.on("message", async (message) =>{
-        let prefix;
-        if(message.guild !== null){ // If in server
-            if(message.author.bot)  //We don't need to answer other bots
-                return;
+    client.on("voiceStateUpdate", (oldUser, newUser)=>{
+        let newUserChannel = newUser.channel;
+        let oldUserChannel = oldUser.channel;
 
-            //Check if the server is new to the bot
-            if(message.guild.id in serverInfo){
-                prefix = serverInfo[message.guild.id]['prefix'];
-            }else{
-                //creates the server entry and adds to mongodb
-                newServer = {
-                    server_id: message.guild.id,
-                    prefix: defaultPrefix
-                };
-                serverCollection.insertOne(newServer, (err, res)=>{
-                    if(err) throw err;
+        if(newUserChannel === null){
+            let alone = true;
+            
+            oldUserChannel.members.forEach((value, key, map)=>{
                 
-                    serverInfo[message.guild.id] = res.ops[0];
-                });
+                if(!value.user.bot){
+                    alone = false;
+                    return;
+                }
+            })
+
+            if(oldUser.guild.id in musicDispatchers){
+                musicDispatchers[oldUser.guild.id].textChannel.send("Leaving");
+                musicDispatchers[oldUser.guild.id].dispatcher.destroy();
+                musicDispatchers[oldUser.guild.id].connection.disconnect();
+                delete musicDispatchers[oldUser.guild.id];
+            }
+        }
+    });
+
+    client.on("message", async (message) =>{
+        let prefix = defaultPrefix;
+        if(dbClient){
+            if(message.guild !== null){ // If in server
+                if(message.author.bot)  //We don't need to answer other bots
+                    return;
+
+                //Check if the server is new to the bot
+                if(message.guild.id in serverInfo){
+                    prefix = serverInfo[message.guild.id]['prefix'];
+                }else{
+                    //creates the server entry and adds to mongodb
+                    newServer = {
+                        server_id: message.guild.id,
+                        prefix: defaultPrefix
+                    };
+                    serverCollection.insertOne(newServer, (err, res)=>{
+                        if(err) throw err;
+                    
+                        serverInfo[message.guild.id] = res.ops[0];
+                    });
+                    prefix = defaultPrefix;
+                }
+            }else{ //In DMs use default prefix
                 prefix = defaultPrefix;
             }
-        }else{ //In DMs use default prefix
-            prefix = defaultPrefix;
         }
 
-        if(message.isMentioned(client.user)){
+        if(message.mentions.has(client.user)){
             message.content = (message.content.replace(new RegExp(`<@!${client.user.id}>\ |<@!${client.user.id}>`), prefix));
         }
 
@@ -148,8 +192,10 @@ function StartDiscordBot()  {
         //creates an argument to be passed to the command
         args = {
             args:args,
-            server: message.guild?serverInfo[message.guild.id]:'',
+            server: serverInfo ? message.guild ? serverInfo[message.guild.id] : '' : '',
             serverCollection: serverCollection,
+            connectedToDB: (dbClient?true:false),
+            musicDispatchers : musicDispatchers
         };
 
         //calls the command

@@ -24,7 +24,7 @@ module.exports = {
                 if(newCommand.aliases){
                     newCommand.aliases.map(alias=>message.client.aliases.set(alias, newCommand));
                 }
-                cooldowns.set(command.name, new Discord.Collection());
+                message.client.cooldowns.set(newCommand.name, new Discord.Collection());
                 return message.channel.send(`Loaded ${commandName} command!`).then(msg=>{message.delete(3000);msg.delete(3000)});
             }catch (error){
                 console.log(error);

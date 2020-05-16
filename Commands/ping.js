@@ -5,6 +5,7 @@ module.exports = {
     args: false,
     guildonly: false,
     usage:"<prefix>ping",
+    hide:false,
     execute(message, args) { 
         message.channel.startTyping();
         message.channel.send("Pong");

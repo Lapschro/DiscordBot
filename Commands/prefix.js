@@ -9,6 +9,8 @@ module.exports = {
     guildonly:true,
     usage:"<prefix>prefix <new prefix>",
     execute(message, args) { 
+        if(!args.connectedToDB)
+            return;
         message.channel.startTyping();
         if(args['args'].length > 0){
             var myObj = {

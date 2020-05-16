@@ -30,7 +30,7 @@ module.exports = {
             if(newCommand.aliases){
                 newCommand.aliases.map(alias=>message.client.aliases.set(alias, newCommand));
             }
-            return message.channel.send(`Reloaded ${commandName} command!`).then(msg=>{message.delete(3000);msg.delete(3000)});
+            return message.channel.send(`Reloaded ${commandName} command!`).then(msg=>{message.delete({timeout:3000, reason:"Yes"});msg.delete({timeout:3000, reason:"Yes"})});
         }catch (error){
             console.log(error);
             return message.channel.send(`An error occurred while reloading ${commandName}:\n\n${error.message}`).then(msg=>{message.delete(3000);msg.delete(3000)});
