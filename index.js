@@ -75,7 +75,10 @@ MongoClient.connect(process.env.DBURL, mongodbSettings,(err, db)=>{
 
 //on SIGINT close connection
 process.on("SIGINT", ()=>{
-        dbClient.close();
+        if(dbClient){
+            dbClient.close();
+            console.log("Conenction to MongoDB Closed");
+        }
 
         for(var key in musicDispatchers){    
             musicDispatchers[key].textChannel.send("Leaving due to bot turning off");
@@ -83,7 +86,6 @@ process.on("SIGINT", ()=>{
             musicDispatchers[key].connection.disconnect();
         }
 
-        console.log("Conenction to MongoDB Closed");
         process.exit();
     }
 );
